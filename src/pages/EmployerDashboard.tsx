@@ -10,6 +10,15 @@ interface EmployerDashboardProps {
 
 export default function EmployerDashboard({ user }: EmployerDashboardProps) {
   const [jobs] = useState<Job[]>(sampleJobs);
+  const [techSearch, setTechSearch] = useState('');
+
+  const filteredTechnicians = sampleTechnicians.filter(
+    (t) =>
+      t.name.toLowerCase().includes(techSearch.toLowerCase()) ||
+      t.headline.toLowerCase().includes(techSearch.toLowerCase()) ||
+      t.skills.some((s) => s.name.toLowerCase().includes(techSearch.toLowerCase())) ||
+      t.city.toLowerCase().includes(techSearch.toLowerCase())
+  );
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -90,17 +99,32 @@ export default function EmployerDashboard({ user }: EmployerDashboardProps) {
 
       {/* Available Talent Pool */}
       <div>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-            <Users className="h-5 w-5 text-brand-600" /> Recommended Talent
-          </h2>
-          <Link to="/employer/compare" className="text-xs font-semibold text-brand-600 hover:underline">
-            Side-by-side comparison →
-          </Link>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+          <div>
+            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <Users className="h-5 w-5 text-brand-600" /> Talent Directory ({filteredTechnicians.length})
+            </h2>
+            <p className="text-xs text-slate-500">Explore verified technical specialists ready for deployment.</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search skills, city, name..."
+                value={techSearch}
+                onChange={(e) => setTechSearch(e.target.value)}
+                className="rounded-xl border border-slate-200 pl-8 pr-3 py-1.5 text-xs outline-none focus:border-brand-500 w-48 sm:w-60 bg-white"
+              />
+            </div>
+            <Link to="/employer/compare" className="text-xs font-semibold text-brand-600 hover:underline shrink-0">
+              Compare →
+            </Link>
+          </div>
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {sampleTechnicians.slice(0, 6).map((tech) => (
+          {filteredTechnicians.map((tech) => (
             <div key={tech.id} className="card-surface p-5 flex flex-col justify-between">
               <div>
                 <div className="flex items-start justify-between">

@@ -128,14 +128,32 @@ export const featuredFeatures = [
 ];
 
 export const sampleUsers: User[] = [
+  // Employers
   { id: 'employer-1', name: 'Maya Patel', email: 'maya@atlasops.io', role: 'employer', company: 'AtlasOps', location: 'Austin, TX' },
+  { id: 'employer-2', name: 'David Kim', email: 'david@techcorp.io', role: 'employer', company: 'TechCorp Solutions', location: 'San Jose, CA' },
+  { id: 'employer-3', name: 'Elena Rostova', email: 'elena@apexlogistics.com', role: 'employer', company: 'Apex Global Logistics', location: 'Chicago, IL' },
+  { id: 'employer-4', name: 'Marcus Vance', email: 'marcus@vancecloud.net', role: 'employer', company: 'Vance Cloud Dynamics', location: 'Dallas, TX' },
+  { id: 'employer-5', name: 'Rachel Green', email: 'rachel@greenfieldenergy.com', role: 'employer', company: 'Greenfield Renewable Energy', location: 'Denver, CO' },
+
+  // Technicians
   { id: 'tech-1', name: 'Omar Hassan', email: 'omar@demo.com', role: 'technician', location: 'Austin, TX' },
   { id: 'tech-2', name: 'Priya Nair', email: 'priya@demo.com', role: 'technician', location: 'Seattle, WA' },
   { id: 'tech-3', name: 'Malik Reed', email: 'malik@demo.com', role: 'technician', location: 'Denver, CO' },
   { id: 'tech-4', name: 'Sofia Chen', email: 'sofia@demo.com', role: 'technician', location: 'Dallas, TX' },
   { id: 'tech-5', name: 'Carlos Morales', email: 'carlos@demo.com', role: 'technician', location: 'Chicago, IL' },
   { id: 'tech-6', name: 'Leila Ahmed', email: 'leila@demo.com', role: 'technician', location: 'Miami, FL' },
-  { id: 'admin-1', name: 'Ava Chen', email: 'ava@skillmatch.io', role: 'admin', company: 'SkillMatch', location: 'San Francisco, CA' }
+  { id: 'tech-7', name: 'Ari Patel', email: 'ari@demo.com', role: 'technician', location: 'Austin, TX' },
+  { id: 'tech-8', name: 'Nadia Shah', email: 'nadia@demo.com', role: 'technician', location: 'Boston, MA' },
+  { id: 'tech-9', name: 'Ethan Brooks', email: 'ethan@demo.com', role: 'technician', location: 'Phoenix, AZ' },
+  { id: 'tech-10', name: 'Janelle Stone', email: 'janelle@demo.com', role: 'technician', location: 'New York, NY' },
+  { id: 'tech-11', name: 'Lucas Silva', email: 'lucas@demo.com', role: 'technician', location: 'Atlanta, GA' },
+  { id: 'tech-12', name: 'Hannah Schmidt', email: 'hannah@demo.com', role: 'technician', location: 'Portland, OR' },
+  { id: 'tech-13', name: 'Derrick Thorne', email: 'derrick@demo.com', role: 'technician', location: 'Houston, TX' },
+
+  // Administrators
+  { id: 'admin-1', name: 'Ava Chen', email: 'ava@skillmatch.io', role: 'admin', company: 'SkillMatch HQ', location: 'San Francisco, CA' },
+  { id: 'admin-2', name: 'Robert Vance', email: 'robert@skillmatch.io', role: 'admin', company: 'SkillMatch Security & Compliance', location: 'New York, NY' },
+  { id: 'admin-3', name: 'Zoe Martinez', email: 'zoe@skillmatch.io', role: 'admin', company: 'SkillMatch Platform Ops', location: 'Austin, TX' }
 ];
 
 export const sampleTechnicians: Technician[] = [
@@ -479,6 +497,108 @@ export const sampleTechnicians: Technician[] = [
     lastActive: '5 hours ago',
     distanceFromUserKm: 2100,
     reviews: [{ reviewer: 'L. Bailey', rating: 5, comment: 'Excellent data architecture work and communication.' }]
+  },
+  {
+    id: 'tech-11',
+    name: 'Lucas Silva',
+    email: 'lucas@demo.com',
+    role: 'technician',
+    headline: 'IoT & Embedded Systems Engineer specializing in edge hardware',
+    location: 'Atlanta, GA',
+    city: 'Atlanta',
+    travelRadiusKm: 140,
+    availability: [{ day: 'Tue', start: '08:30', end: '16:30' }, { day: 'Thu', start: '08:30', end: '16:30' }],
+    hourlyRate: 85,
+    fixedPrice: 2800,
+    responseTime: '4 hours',
+    willingness: true,
+    verified: true,
+    rating: 4.9,
+    reviewCount: 34,
+    yearsExperience: 8,
+    completedProjects: 23,
+    skills: [
+      { name: 'C++', level: 93 },
+      { name: 'Python', level: 90 },
+      { name: 'RTOS', level: 88 },
+      { name: 'MQTT', level: 92 }
+    ],
+    certifications: [
+      { name: 'CompTIA Security+', verified: true, status: 'verified' },
+      { name: 'ARM Architecture Certified', verified: true, status: 'verified' }
+    ],
+    portfolio: 'https://portfolio.example/lucas',
+    lastActive: '1 hour ago',
+    distanceFromUserKm: 1500,
+    reviews: [{ reviewer: 'M. Vance', rating: 5, comment: 'Phenomenal firmware and sensor network debugging.' }]
+  },
+  {
+    id: 'tech-12',
+    name: 'Hannah Schmidt',
+    email: 'hannah@demo.com',
+    role: 'technician',
+    headline: 'Industrial Robotics & Mechatronics Field Specialist',
+    location: 'Portland, OR',
+    city: 'Portland',
+    travelRadiusKm: 160,
+    availability: [{ day: 'Mon', start: '09:00', end: '17:00' }, { day: 'Wed', start: '09:00', end: '17:00' }, { day: 'Fri', start: '09:00', end: '15:00' }],
+    hourlyRate: 98,
+    fixedPrice: 3600,
+    responseTime: '5 hours',
+    willingness: true,
+    verified: true,
+    rating: 4.8,
+    reviewCount: 29,
+    yearsExperience: 9,
+    completedProjects: 21,
+    skills: [
+      { name: 'PLC', level: 95 },
+      { name: 'Robotics', level: 92 },
+      { name: 'Computer Vision', level: 86 },
+      { name: 'Safety Audits', level: 90 }
+    ],
+    certifications: [
+      { name: 'Fanuc Certified Robotics Professional', verified: true, status: 'verified' },
+      { name: 'OSHA 30 Field Safety', verified: true, status: 'verified' }
+    ],
+    portfolio: 'https://portfolio.example/hannah',
+    lastActive: '3 hours ago',
+    distanceFromUserKm: 2800,
+    reviews: [{ reviewer: 'G. Bennett', rating: 5, comment: 'Rapid turnaround on PLC diagnostics and safety sign-off.' }]
+  },
+  {
+    id: 'tech-13',
+    name: 'Derrick Thorne',
+    email: 'derrick@demo.com',
+    role: 'technician',
+    headline: 'Principal Database Architect & High-Scale Systems Tuner',
+    location: 'Houston, TX',
+    city: 'Houston',
+    travelRadiusKm: 180,
+    availability: [{ day: 'Mon', start: '10:00', end: '18:00' }, { day: 'Tue', start: '10:00', end: '18:00' }, { day: 'Thu', start: '10:00', end: '18:00' }],
+    hourlyRate: 115,
+    fixedPrice: 4500,
+    responseTime: '2 hours',
+    willingness: true,
+    verified: true,
+    rating: 4.9,
+    reviewCount: 45,
+    yearsExperience: 14,
+    completedProjects: 38,
+    skills: [
+      { name: 'PostgreSQL', level: 98 },
+      { name: 'Redis', level: 94 },
+      { name: 'Kafka', level: 91 },
+      { name: 'Database Architecture', level: 97 }
+    ],
+    certifications: [
+      { name: 'Oracle Certified Master', verified: true, status: 'verified' },
+      { name: 'AWS Certified Database Specialist', verified: true, status: 'verified' }
+    ],
+    portfolio: 'https://portfolio.example/derrick',
+    lastActive: '45 mins ago',
+    distanceFromUserKm: 260,
+    reviews: [{ reviewer: 'C. Ross', rating: 5, comment: 'Resolved severe latency bottleneck in under 48 hours.' }]
   }
 ];
 

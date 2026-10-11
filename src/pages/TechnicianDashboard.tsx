@@ -146,6 +146,23 @@ export default function TechnicianDashboard({ user }: TechnicianDashboardProps) 
               ))}
             </div>
           </div>
+
+          <div className="card-surface p-6">
+            <h3 className="font-bold text-slate-900 mb-4">Peer Network</h3>
+            <div className="space-y-3">
+              {sampleTechnicians.filter((t) => t.id !== technician.id).slice(0, 4).map((peer) => (
+                <div key={peer.id} className="flex items-center justify-between text-xs p-2.5 rounded-xl bg-slate-50">
+                  <div>
+                    <div className="font-semibold text-slate-900">{peer.name}</div>
+                    <div className="text-[11px] text-slate-500">{peer.city} · ${peer.hourlyRate}/hr</div>
+                  </div>
+                  <Link to={`/technician/${peer.id}`} className="font-semibold text-brand-600 hover:text-brand-500">
+                    Profile →
+                  </Link>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>
