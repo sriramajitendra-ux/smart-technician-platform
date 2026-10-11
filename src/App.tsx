@@ -1,1 +1,181 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';\nimport { useState } from 'react';\nimport Navigation from './components/Navigation';\nimport LandingPage from './pages/LandingPage';\nimport LoginPage from './pages/LoginPage';\nimport RegisterPage from './pages/RegisterPage';\nimport EmployerDashboard from './pages/EmployerDashboard';\nimport TechnicianDashboard from './pages/TechnicianDashboard';\nimport AdminDashboard from './pages/AdminDashboard';\nimport CreateJobPage from './pages/CreateJobPage';\nimport JobRecommendationsPage from './pages/JobRecommendationsPage';\nimport TechnicianProfilePage from './pages/TechnicianProfilePage';\nimport ComparisonPage from './pages/ComparisonPage';\nimport NotificationCenter from './pages/NotificationCenter';\nimport TechnicianProfileEdit from './pages/TechnicianProfileEdit';\nimport './App.css';\n\nexport type UserRole = 'employer' | 'technician' | 'admin';\n\nexport type SkillItem = {\n  name: string;\n  level: number;\n  years?: number;\n};\n\nexport type Certification = {\n  name: string;\n  verified: boolean;\n  status: 'verified' | 'pending';\n};\n\nexport type AvailabilityWindow = {\n  day: string;\n  start: string;\n  end: string;\n};\n\nexport type Technician = {\n  id: string;\n  name: string;\n  email: string;\n  role: 'technician';\n  headline: string;\n  profilePhoto?: string;\n  location: string;\n  city: string;\n  travelRadiusKm: number;\n  availability: AvailabilityWindow[];\n  hourlyRate: number;\n  fixedPrice: number;\n  responseTime: string;\n  willingness: boolean;\n  verified: boolean;\n  rating: number;\n  reviewCount: number;\n  yearsExperience: number;\n  completedProjects: number;\n  skills: SkillItem[];\n  certifications: Certification[];\n  portfolio: string;\n  lastActive: string;\n  distanceFromUserKm?: number;\n  reviews?: { reviewer: string; rating: number; comment: string }[];\n};\n\nexport type User = {\n  id: string;\n  name: string;\n  email: string;\n  role: UserRole;\n  company?: string;\n  location?: string;\n};\n\nexport type RequiredSkill = {\n  name: string;\n  minLevel: number;\n  priority: 'mandatory' | 'preferred';\n};\n\nexport type Job = {\n  id: string;\n  title: string;\n  category: string;\n  description: string;\n  location: string;\n  workArrangement: 'remote' | 'onsite' | 'hybrid';\n  deadline: string;\n  durationDays: number;\n  budgetMin: number;\n  budgetMax: number;\n  paymentModel: 'hourly' | 'fixed' | 'negotiable';\n  availabilityRequirement: string;\n  requiredSkills: RequiredSkill[];\n  mandatoryCertifications: string[];\n  maxTravelDistanceKm?: number;\n  experienceYears: number;\n};\n\nexport type Notification = {\n  id: string;\n  title: string;\n  message: string;\n  read: boolean;\n  type: 'job' | 'invitation' | 'system';\n  createdAt: string;\n};\n\nexport type InvitationStatus = 'pending' | 'accepted' | 'declined' | 'expired';\n\nexport type Invitation = {\n  id: string;\n  jobId: string;\n  technicianId: string;\n  employerId: string;\n  status: InvitationStatus;\n  createdAt: string;\n};\n\nfunction App() {\n  const [currentUser, setCurrentUser] = useState<User | null>(null);\n  const [notifications, setNotifications] = useState<Notification[]>([]);\n\n  const handleLogin = (user: User) => {\n    setCurrentUser(user);\n  };\n\n  const handleLogout = () => {\n    setCurrentUser(null);\n  };\n\n  return (\n    <div className=\"flex flex-col min-h-screen bg-slate-50\">\n      <Navigation currentUser={currentUser} onLogout={handleLogout} />\n      <main className=\"flex-1\">\n        <Routes>\n          <Route path=\"/\" element={<LandingPage />} />\n          <Route path=\"/login\" element={<LoginPage onLogin={handleLogin} />} />\n          <Route path=\"/register\" element={<RegisterPage onLogin={handleLogin} />} />\n          <Route\n            path=\"/employer/dashboard\"\n            element={currentUser?.role === 'employer' ? <EmployerDashboard user={currentUser} /> : <Navigate to=\"/login\" />}\n          />\n          <Route\n            path=\"/employer/create-job\"\n            element={currentUser?.role === 'employer' ? <CreateJobPage user={currentUser} /> : <Navigate to=\"/login\" />}\n          />\n          <Route\n            path=\"/employer/recommendations/:jobId\"\n            element={currentUser?.role === 'employer' ? <JobRecommendationsPage user={currentUser} /> : <Navigate to=\"/login\" />}\n          />\n          <Route\n            path=\"/employer/compare\"\n            element={currentUser?.role === 'employer' ? <ComparisonPage user={currentUser} /> : <Navigate to=\"/login\" />}\n          />\n          <Route\n            path=\"/technician/:id\"\n            element={<TechnicianProfilePage />}\n          />\n          <Route\n            path=\"/technician/dashboard\"\n            element={currentUser?.role === 'technician' ? <TechnicianDashboard user={currentUser} /> : <Navigate to=\"/login\" />}\n          />\n          <Route\n            path=\"/technician/profile/edit\"\n            element={currentUser?.role === 'technician' ? <TechnicianProfileEdit user={currentUser} /> : <Navigate to=\"/login\" />}\n          />\n          <Route\n            path=\"/admin/dashboard\"\n            element={currentUser?.role === 'admin' ? <AdminDashboard user={currentUser} /> : <Navigate to=\"/login\" />}\n          />\n          <Route\n            path=\"/notifications\"\n            element={currentUser ? <NotificationCenter user={currentUser} /> : <Navigate to=\"/login\" />}\n          />\n        </Routes>\n      </main>\n    </div>\n  );\n}\n\nexport default App;\n
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { useState } from 'react';
+import Navigation from './components/Navigation';
+import LandingPage from './pages/LandingPage';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import EmployerDashboard from './pages/EmployerDashboard';
+import TechnicianDashboard from './pages/TechnicianDashboard';
+import AdminDashboard from './pages/AdminDashboard';
+import CreateJobPage from './pages/CreateJobPage';
+import JobRecommendationsPage from './pages/JobRecommendationsPage';
+import TechnicianProfilePage from './pages/TechnicianProfilePage';
+import ComparisonPage from './pages/ComparisonPage';
+import NotificationCenter from './pages/NotificationCenter';
+import TechnicianProfileEdit from './pages/TechnicianProfileEdit';
+import './App.css';
+
+export type UserRole = 'employer' | 'technician' | 'admin';
+
+export type SkillItem = {
+  name: string;
+  level: number;
+  years?: number;
+};
+
+export type Certification = {
+  name: string;
+  verified: boolean;
+  status: 'verified' | 'pending';
+};
+
+export type AvailabilityWindow = {
+  day: string;
+  start: string;
+  end: string;
+};
+
+export type Technician = {
+  id: string;
+  name: string;
+  email: string;
+  role: 'technician';
+  headline: string;
+  profilePhoto?: string;
+  location: string;
+  city: string;
+  travelRadiusKm: number;
+  availability: AvailabilityWindow[];
+  hourlyRate: number;
+  fixedPrice: number;
+  responseTime: string;
+  willingness: boolean;
+  verified: boolean;
+  rating: number;
+  reviewCount: number;
+  yearsExperience: number;
+  completedProjects: number;
+  skills: SkillItem[];
+  certifications: Certification[];
+  portfolio: string;
+  lastActive: string;
+  distanceFromUserKm?: number;
+  reviews?: { reviewer: string; rating: number; comment: string }[];
+};
+
+export type User = {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  company?: string;
+  location?: string;
+};
+
+export type RequiredSkill = {
+  name: string;
+  minLevel: number;
+  priority: 'mandatory' | 'preferred';
+};
+
+export type Job = {
+  id: string;
+  title: string;
+  category: string;
+  description: string;
+  location: string;
+  workArrangement: 'remote' | 'onsite' | 'hybrid';
+  deadline: string;
+  durationDays: number;
+  budgetMin: number;
+  budgetMax: number;
+  paymentModel: 'hourly' | 'fixed' | 'negotiable';
+  availabilityRequirement: string;
+  requiredSkills: RequiredSkill[];
+  mandatoryCertifications: string[];
+  maxTravelDistanceKm?: number;
+  experienceYears: number;
+};
+
+export type Notification = {
+  id: string;
+  title: string;
+  message: string;
+  read: boolean;
+  type: 'job' | 'invitation' | 'system';
+  createdAt: string;
+};
+
+export type InvitationStatus = 'pending' | 'accepted' | 'declined' | 'expired';
+
+export type Invitation = {
+  id: string;
+  jobId: string;
+  technicianId: string;
+  employerId: string;
+  status: InvitationStatus;
+  createdAt: string;
+};
+
+function App() {
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+
+  const handleLogin = (user: User) => {
+    setCurrentUser(user);
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+  };
+
+  return (
+    <div className="flex flex-col min-h-screen bg-slate-50">
+      <Navigation currentUser={currentUser} onLogout={handleLogout} />
+      <main className="flex-1">
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
+          <Route path="/register" element={<RegisterPage onLogin={handleLogin} />} />
+          <Route
+            path="/employer/dashboard"
+            element={currentUser?.role === 'employer' ? <EmployerDashboard user={currentUser} /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/employer/create-job"
+            element={currentUser?.role === 'employer' ? <CreateJobPage user={currentUser} /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/employer/recommendations/:jobId"
+            element={currentUser?.role === 'employer' ? <JobRecommendationsPage user={currentUser} /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/employer/compare"
+            element={currentUser?.role === 'employer' ? <ComparisonPage user={currentUser} /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/technician/:id"
+            element={<TechnicianProfilePage />}
+          />
+          <Route
+            path="/technician/dashboard"
+            element={currentUser?.role === 'technician' ? <TechnicianDashboard user={currentUser} /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/technician/profile/edit"
+            element={currentUser?.role === 'technician' ? <TechnicianProfileEdit user={currentUser} /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/admin/dashboard"
+            element={currentUser?.role === 'admin' ? <AdminDashboard user={currentUser} /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/notifications"
+            element={currentUser ? <NotificationCenter user={currentUser} /> : <Navigate to="/login" />}
+          />
+        </Routes>
+      </main>
+    </div>
+  );
+}
+
+export default App;

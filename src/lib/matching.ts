@@ -416,3 +416,223 @@ export const seedInvitations: Invitation[] = [
     createdAt: '2026-10-11T09:20:00Z'
   }
 ];
+export type MatchResult = {
+  technician: Technician;
+  score: number;
+  category: 'Highly Recommended' | 'Moderately Recommended' | 'Low Priority';
+  explanation: string[];
+  criterionScores: Record<string, number>;
+  mandatoryPassed: boolean;
+  missingMandatory: string[];
+  nearMatch?: boolean;
+};
+
+const WEIGHTS = {
+  skill: 30,
+  availability: 20,
+  location: 15,
+  price: 15,
+  experience: 10,
+  certifications: 5,
+  reviews: 5
+};
+
+export function matchTechnicians(job: Job, technicians: Technician[]): MatchResult[] {
+  const results: MatchResult[] = [];
+
+  technicians.forEach((technician) => {
+    const missingMandatory: string[] = [];
+    const mandatorySkills = job.requiredSkills.filter((skill) => skill.priority === 'mandatory');
+    const skillMatch = mandatorySkills.every((skill) => {
+      const hasSkill = technician.skills.some((item) => item.name.toLowerCase() === skill.name.toLowerCase());
+      if (!hasSkill) {
+        missingMandatory.push(skill.name);
+        return false;
+      }
+      const actualSkill = technician.skills.find((item) => item.name.toLowerCase() === skill.name.toLowerCase());
+      if ((actualSkill?.level ?? 0) < skill.minLevel) {
+        missingMandatory.push(skill.name);
+        return false;
+      }
+      return true;
+    });
+
+    const mandatoryCerts = job.mandatoryCertifications || [];
+    const certMissing = mandatoryCerts.filter((cert) => !technician.certifications.some((item) => item.name.toLowerCase() === cert.toLowerCase() && item.verified));
+    if (certMissing.length > 0) {
+      missingMandatory.push(...certMissing);
+    }
+
+    const availabilityScore = calculateAvailabilityScore(job, technician);
+    const locationScore = calculateLocationScore(job, technician);
+    const priceScore = calculatePriceScore(job, technician);
+    const experienceScore = calculateExperienceScore(job, technician);
+    const certificationScore = calculateCertificationScore(job, technician);
+    const reviewsScore = calculateReviewScore(job, technician);
+    const skillScore = calculateSkillScore(job, technician);
+
+    const mandatoryEligible = skillMatch && certMissing.length === 0 && technician.willingness && availabilityScore >= 50 && locationScore >= 40 && priceScore >= 30;
+
+    if (!mandatoryEligible) {
+      results.push({
+        technician,
+        score: 0,
+        category: 'Low Priority',
+        explanation: [
+          ...missingMandatory.length ? [`Mandatory eligibility failed: ${missingMandatory.join(', ')}`] : [],
+          `Willingness: ${technician.willingness ? 'accepted' : 'not available'}; location and budget checks were also considered.`
+        ],
+        criterionScores: {
+          skill: skillScore,
+          availability: availabilityScore,
+          location: locationScore,
+          price: priceScore,
+          experience: experienceScore,
+          certifications: certificationScore,
+          reviews: reviewsScore
+        },
+        mandatoryPassed: false,
+        missingMandatory: missingMandatory.length ? missingMandatory : ['Eligibility not met']
+      });
+      return;
+    }
+
+    const weightedScore =
+      (skillScore * WEIGHTS.skill) / 100 +
+      (availabilityScore * WEIGHTS.availability) / 100 +
+      (locationScore * WEIGHTS.location) / 100 +
+      (priceScore * WEIGHTS.price) / 100 +
+      (experienceScore * WEIGHTS.experience) / 100 +
+      (certificationScore * WEIGHTS.certifications) / 100 +
+      (reviewsScore * WEIGHTS.reviews) / 100;
+
+    const final = Math.round(weightedScore * 100);
+    const category = final >= 80 ? 'Highly Recommended' : final >= 60 ? 'Moderately Recommended' : 'Low Priority';
+
+    const reasons = [
+      `Skill fit: ${skillScore}/100 based on ${job.requiredSkills.length} relevant requirements.`,
+      `Availability: ${availabilityScore}/100 based on requested schedule and completion window.`,
+      `Location: ${locationScore}/100 using service radius and distance fit.`,
+      `Price: ${priceScore}/100 relative to the stated budget range.`,
+      `Experience: ${experienceScore}/100 based on relevant work history.`,
+      `Verification: ${certificationScore}/100 using relevant certifications and verification.`,
+      `Reviews: ${reviewsScore}/100 based on customer feedback quality and count.`
+    ];
+
+    results.push({
+      technician,
+      score: final,
+      category,
+      explanation: reasons,
+      criterionScores: {
+        skill: skillScore,
+        availability: availabilityScore,
+        location: locationScore,
+        price: priceScore,
+        experience: experienceScore,
+        certifications: certificationScore,
+        reviews: reviewsScore
+      },
+      mandatoryPassed: true,
+      missingMandatory: []
+    });
+  });
+
+  return results.sort((a, b) => b.score - a.score || b.criterionScores.availability - a.criterionScores.availability);
+}
+
+function calculateSkillScore(job: Job, technician: Technician): number {
+  const relevantSkills = job.requiredSkills.filter((skill) => skill.priority === 'mandatory' || skill.priority === 'preferred');
+  if (!relevantSkills.length) return 100;
+
+  let total = 0;
+  relevantSkills.forEach((skill) => {
+    const techSkill = technician.skills.find((item) => item.name.toLowerCase() === skill.name.toLowerCase());
+    const level = techSkill?.level ?? 0;
+    const normalized = Math.min(100, Math.max(0, (level / Math.max(skill.minLevel, 80)) * 100));
+    total += normalized;
+  });
+
+  return Math.min(100, Math.round(total / relevantSkills.length));
+}
+
+function calculateAvailabilityScore(job: Job, technician: Technician): number {
+  if (!technician.availability || !technician.availability.length) return 45;
+  const jobDeadline = new Date(job.deadline).getTime();
+  const now = Date.now();
+  const daysUntilDeadline = Math.max(1, Math.ceil((jobDeadline - now) / (1000 * 60 * 60 * 24)));
+  const scheduleCoverage = technician.availability.length;
+  const score = Math.min(100, 40 + scheduleCoverage * 18 + Math.min(35, Math.max(0, 30 - daysUntilDeadline / 2)));
+  return Math.round(score);
+}
+
+function calculateLocationScore(job: Job, technician: Technician): number {
+  const distance = technician.distanceFromUserKm ?? 120;
+  if (!job.maxTravelDistanceKm) return 90;
+  const travelLimit = job.maxTravelDistanceKm;
+  if (distance <= travelLimit) {
+    return 85 + Math.max(0, 15 - (distance / travelLimit) * 15);
+  }
+  const exceeded = distance - travelLimit;
+  return Math.max(0, 60 - exceeded * 0.2);
+}
+
+function calculatePriceScore(job: Job, technician: Technician): number {
+  const avgHour = technician.hourlyRate ?? 0;
+  const budgetMax = job.budgetMax;
+  const budgetMin = job.budgetMin;
+  if (avgHour <= budgetMax && avgHour >= budgetMin * 0.6) return 90;
+  if (avgHour <= budgetMax) return 75;
+  return 35;
+}
+
+function calculateExperienceScore(job: Job, technician: Technician): number {
+  const score = Math.min(100, (technician.yearsExperience / Math.max(job.experienceYears, 2)) * 100);
+  return Math.round(score);
+}
+
+function calculateCertificationScore(job: Job, technician: Technician): number {
+  if (!job.mandatoryCertifications.length && !technician.certifications.length) return 60;
+  const relevant = technician.certifications.filter((cert) => cert.verified);
+  const total = job.mandatoryCertifications.length || relevant.length || 1;
+  const matched = relevant.filter((cert) => {
+    const target = job.mandatoryCertifications.map((c) => c.toLowerCase());
+    return target.includes(cert.name.toLowerCase());
+  }).length;
+  const score = Math.min(100, (matched / total) * 100 + 20);
+  return Math.round(score);
+}
+
+function calculateReviewScore(_job: Job, technician: Technician): number {
+  const averageRating = (technician.rating ?? 0) * 20;
+  const countBoost = Math.min(20, technician.reviewCount / 2);
+  return Math.min(100, Math.round(averageRating + countBoost));
+}
+
+export function getRecommendationSummary(results: MatchResult[]): string {
+  if (!results.length) return 'No technicians matched the current requirements.';
+  const top = results[0];
+  return `${top.technician.name} leads with ${top.score}% match.`;
+}
+
+export function getNearMatches(job: Job, technicians: Technician[]): MatchResult[] {
+  return matchTechnicians(job, technicians).filter((result) => !result.mandatoryPassed);
+}
+
+export function formatCurrency(value: number) {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 0
+  }).format(value);
+}
+
+export function normalizePriority(value: 'mandatory' | 'preferred') {
+  return value === 'mandatory' ? 'Mandatory' : 'Preferred';
+}
+
+export function getCategoryColor(category: MatchResult['category']) {
+  if (category === 'Highly Recommended') return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+  if (category === 'Moderately Recommended') return 'bg-amber-50 text-amber-700 border-amber-200';
+  return 'bg-slate-100 text-slate-700 border-slate-200';
+}
