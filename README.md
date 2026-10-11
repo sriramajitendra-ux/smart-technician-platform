@@ -1,2 +1,7 @@
-# smart-technician-platform
-A complete web application for recommending the best technician for jobs based on skills, availability, location, and price.
+# Frontend environment placeholders (no secrets committed)
+VITE_APP_NAME=SkillMatch Pro
+VITE_API_MODE=demo
+VITE_SUPABASE_URL=
+VITE_SUPABASE_ANON_KEY=
+VITE_EMAIL_PROVIDER=disabled
+VITE_AI_SCREENING=disabled
